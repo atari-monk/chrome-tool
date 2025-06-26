@@ -1,3 +1,4 @@
+from typing import Any, Dict
 import argparse
 import json
 from datetime import datetime
@@ -25,7 +26,8 @@ def generate_config():
 
     args = parser.parse_args()
 
-    new_task = {
+
+    new_task: Dict[str, Any] = {
         "name": args.task,
         "prompt": args.prompt,
         "output_file": f"{args.task}.py",
@@ -43,7 +45,7 @@ def generate_config():
 
     output_path = output_dir / f"{args.project}.json"
 
-    tasks = []
+    tasks: list[dict[str, Any]] = []
     if output_path.exists():
         with open(output_path, "r") as f:
             tasks = json.load(f)

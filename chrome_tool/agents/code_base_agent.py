@@ -7,6 +7,7 @@ from chrome_tool.agents.generate_class_template import (
 )
 from chrome_tool.files import get_py_files
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("path", help="Path to Python file containing the class")

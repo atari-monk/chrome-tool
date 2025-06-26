@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import List
 
+
 def get_py_files(folder_path: Path) -> list[Path]:
     py_files: List[Path] = []
     for root, _, files in os.walk(folder_path):

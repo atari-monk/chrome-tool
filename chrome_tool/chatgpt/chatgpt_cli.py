@@ -1,14 +1,14 @@
 import time
 from colorama import Fore, Style
-from chatgpt.config.code_block_config import CodeBlockConfig
-from chatgpt.config.prompt_config import PromptConfig
-from chatgpt.config.chatgpt_config import ChatGPTConfig
-from chatgpt.chatgpt_automation import (
+from chrome_tool.chatgpt.config.code_block_config import CodeBlockConfig
+from chrome_tool.chatgpt.config.prompt_config import PromptConfig
+from chrome_tool.chatgpt.config.chatgpt_config import ChatGPTConfig
+from chrome_tool.chatgpt.chatgpt_automation import (
     save_code_block,
     send_prompt,
 )
-from chrome_automation import open_chrome_with_profile
-from colorama_utils import color_print
+from chrome_tool.chrome_automation import open_chrome_with_profile
+from chrome_tool.colorama_utils import color_print
 from selenium import webdriver
 
 

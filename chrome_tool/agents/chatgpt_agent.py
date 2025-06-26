@@ -1,13 +1,14 @@
 from pathlib import Path
 from chrome_tool.agents.interface.i_chatgpt_agent import IChatGPTAgent
-from chatgpt.config.code_block_config import CodeBlockConfig
-from chatgpt.config.prompt_config import PromptConfig
-from chatgpt.chatgpt_cli import (
+from chrome_tool.chatgpt.config.code_block_config import CodeBlockConfig
+from chrome_tool.chatgpt.config.prompt_config import PromptConfig
+from chrome_tool.chatgpt.chatgpt_cli import (
     open_chatgpt_session,
     save_chatgpt_code_block,
     send_chatgpt_prompt,
 )
-from chatgpt.config.chatgpt_config import ChatGPTConfig
+from chrome_tool.chatgpt.config.chatgpt_config import ChatGPTConfig
+
 
 class ChatGPTAgent(IChatGPTAgent):
     def __init__(self):
