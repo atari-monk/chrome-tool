@@ -1,7 +1,7 @@
 from pathlib import Path
-from agents.chatgpt_agent import ChatGPTAgent
-from agents.code_agent import CodeAgent
-from agents.code_task import CodeTask
+from chrome_tool.agents.chatgpt_agent import ChatGPTAgent
+from chrome_tool.agents.code_agent import CodeAgent
+from chrome_tool.agents.code_task import CodeTask
 
 
 def code_agent_smoke_test():

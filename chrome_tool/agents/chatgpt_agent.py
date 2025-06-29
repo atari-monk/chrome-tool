@@ -20,7 +20,7 @@ class ChatGPTAgent(IChatGPTAgent):
         self.driver = open_chatgpt_session(
             ChatGPTConfig(
                 page="https://chat.openai.com/",
-                config_path=r"C:\atari-monk\code\apps-data-store\chrome_profiles.json",
+                config_path=r"C:\atari-monk\code\docs\apps-data-store\chrome_profiles.json",
                 detach=True))
 
     def close(self):

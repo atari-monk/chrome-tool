@@ -8,7 +8,7 @@ setup(
     install_requires=[],
     entry_points={
         "console_scripts": [
-            "ai-tool=chrome_tool.agents.smoke.run_code_agent_on_toml:main",
+            "ai_tool=chrome_tool.agents.smoke.run_code_agent_on_toml:main",
         ],
     },
     python_requires=">=3.7",

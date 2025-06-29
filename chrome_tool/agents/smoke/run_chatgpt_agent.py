@@ -1,5 +1,5 @@
 from pathlib import Path
-from agents.chatgpt_agent import ChatGPTAgent
+from chrome_tool.agents.chatgpt_agent import ChatGPTAgent
 
 
 def chatgpt_agent_smoke_test():

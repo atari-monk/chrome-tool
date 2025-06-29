@@ -34,7 +34,7 @@ def get_chrome_profile(config_file_path: Union[Path, str]) -> dict[str, str] | N
 
 
 def main():
-    if profile := get_chrome_profile(r"C:\atari-monk\code\apps-data-store\chrome_profiles.json"):
+    if profile := get_chrome_profile(r"C:\atari-monk\code\docs\apps-data-store\chrome_profiles.json"):
         print(f"Active Profile: {profile['chromeProfilePath']}")
     else:
         print("No active Chrome profile found")

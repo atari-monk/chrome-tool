@@ -1,4 +1,4 @@
-from agents.code_task import CodeTask
+from chrome_tool.agents.code_task import CodeTask
 import types
 from typing import List, Optional, Protocol, Type, runtime_checkable
 

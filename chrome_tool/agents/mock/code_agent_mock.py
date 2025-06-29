@@ -1,6 +1,6 @@
 import types
 from typing import List, Optional, Type
-from agents.code_task import CodeTask
+from chrome_tool.agents.code_task import CodeTask
 from chrome_tool.agents.interface.i_chatgpt_agent import IChatGPTAgent
 from chrome_tool.agents.interface.i_code_agent import ICodeAgent
 
