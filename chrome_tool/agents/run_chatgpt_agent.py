@@ -2,7 +2,7 @@ from pathlib import Path
 from chrome_tool.agents.chatgpt_agent import ChatGPTAgent
 
 
-def chatgpt_agent_smoke_test():
+def main():
     assumptions = "Dont use comments in code. Do not wrtie anything but code. Asume strict typing."
     function = f"Python function that calculates the Fibonacci sequence."
     test = f"Write pytest unit test for {function}. Only test, dont implement the function yet, import it from same directory."
@@ -18,4 +18,4 @@ def chatgpt_agent_smoke_test():
     c.close()
 
 if __name__ == "__main__":
-    chatgpt_agent_smoke_test()
+    main()
