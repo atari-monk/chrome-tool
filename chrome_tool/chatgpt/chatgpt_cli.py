@@ -8,7 +8,7 @@ from chrome_tool.chatgpt.chatgpt_automation import (
     send_prompt,
 )
 from chrome_tool.chrome_automation import open_chrome_with_profile
-from chrome_tool.colorama_utils import color_print
+from chrome_tool.utils.colorama import color_print
 from selenium import webdriver
 
 

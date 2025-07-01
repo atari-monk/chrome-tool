@@ -10,11 +10,11 @@ import pyperclip
 import time
 from chrome_tool.chatgpt.config.code_block_config import CodeBlockConfig
 from chrome_tool.chatgpt.config.prompt_config import PromptConfig
-from chrome_tool.json_utils import (
+from chrome_tool.utils.json import (
     append_json_strings_to_array,
     convert_paths_to_json_safe,
 )
-from chrome_tool.string_utils import clean_code
+from chrome_tool.utils.string import clean_code
 
 
 def send_prompt(config: PromptConfig) -> bool:
