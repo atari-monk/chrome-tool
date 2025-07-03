@@ -8,7 +8,7 @@ setup(
     install_requires=[],
     entry_points={
         "console_scripts": [
-            "ai_tool=chrome_tool.agents.run_chatgpt_agent:main",
+            "ai_tool=chrome_tool.run_chatgpt_agent:main",
         ],
     },
     python_requires=">=3.7",
