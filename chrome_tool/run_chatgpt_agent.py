@@ -3,18 +3,26 @@ from chrome_tool.chatgpt_agent import ChatGPTAgent
 
 
 def main():
-    assumptions = "Dont use comments in code. Do not wrtie anything but code. Asume strict typing."
-    function = f"Python function that calculates the Fibonacci sequence."
-    test = f"Write pytest unit test for {function}. Only test, dont implement the function yet, import it from same directory."
-    task = f"Write a {function} passing all tests."
+    prompt_1 = """
+    Rules :
+    - Strict types
+    - Dont use any type of comments in code
+    - Write only ONE code block, no other text
+    Task : I want to implement Fibonacci sequence function in TDD style, so first write pytest unit tests for it.
+    'from chrome_tool.tmp.fibonacci import fibonacci' use this import.
+    """
+
+    prompt_2 = """
+    Task : Write python function that calculates the Fibonacci sequence. 
+    Pass all tests."""
 
     c = ChatGPTAgent()
     c.open()
-    c.send_prompt(f"{assumptions} {test}")
-    c.save_code(Path("data/fibonacci.test.py"))
+    c.send_prompt(prompt_1)
+    c.save_code(Path("test_fibonacci.py"))
 
-    c.send_prompt(task)
-    c.save_code(Path("data/fibonacci.py"))
+    c.send_prompt(prompt_2)
+    c.save_code(Path("fibonacci.py"))
     c.close()
 
 if __name__ == "__main__":
