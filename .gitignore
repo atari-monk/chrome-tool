@@ -4,3 +4,4 @@ chrome_tool.egg-info/
 .pytest_cache/
 .coverage
 .ruff_cache/
+generated
