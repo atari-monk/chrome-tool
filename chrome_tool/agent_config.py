@@ -2,6 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ChatGPTConfig:
+class AgentConfig:
     page: str
     detach: bool = True

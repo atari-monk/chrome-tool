@@ -1,5 +1,5 @@
 from pathlib import Path
-from chrome_tool.chatgpt_agent import ChatGPTAgent
+from chrome_tool.agent import Agent
 
 
 def main():
@@ -16,8 +16,8 @@ def main():
     Task : Write python function that calculates the Fibonacci sequence. 
     Pass all tests."""
 
-    c = ChatGPTAgent()
-    c.open()
+    c = Agent()
+    c.open_chrome_with_profile()
     c.send_prompt(prompt_1)
     c.save_code(Path("test_fibonacci.py"))
 

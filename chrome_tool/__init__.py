@@ -1,5 +1,5 @@
 from chrome_tool.code_task import CodeTask
-from chrome_tool.chatgpt_agent import ChatGPTAgent
+from chrome_tool.agent import Agent
 
 
-__all__ = ["CodeTask", "ChatGPTAgent"]
+__all__ = ["CodeTask", "Agent"]
