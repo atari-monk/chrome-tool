@@ -22,15 +22,15 @@ from chrome_tool.utils.string import clean_code
 from colorama import Fore, Style
 from chrome_tool.utils.colorama import color_print
 import os
-from typing import Any, cast
+from typing import Any, Optional, cast
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from chrome_tool.chrome_profiles import get_first_chrome_profile
 from chrome_tool.utils.url import is_valid_url
 from chrome_tool.agent_config import AgentConfig
 from colorama import Fore, Style
 from chrome_tool.utils.colorama import color_print
+from chrome_tool.chrome_profile import ChromeProfile
 
 
 class Agent:
@@ -47,7 +47,7 @@ class Agent:
         if not is_valid_url(config.page):
             raise ValueError(f"Invalid URL: '{config.page}'. Must include scheme (e.g., https://) and domain.")
         
-        if not (profile := get_first_chrome_profile()):
+        if not (profile := self._get_first_chrome_profile()):
             print("No active Chrome profile found")
             return None
         
@@ -83,10 +83,26 @@ class Agent:
         except Exception as e:
             print(f"Failed to start Chrome: {str(e)}")
 
+    def _get_first_chrome_profile(self) -> Optional[ChromeProfile]:
+        profile_data = [
+            (Path("C:/atari-monk/my_chrome_profile"), "Default"),
+            (Path("C:/Users/ASUS/AppData/Local/Google/Chrome/User Data"), "Default"),
+            (Path("C:/Selenium"), "Profile 2"),
+            (Path("C:/Users/atari/AppData/Local/Google/Chrome/User Data"), "Profile 2"),
+        ]
+        for path, name in profile_data:
+            if path.exists():
+                return ChromeProfile(path, name)
+        return None
+
     def close(self):
         if self.driver is not None:
-            self.driver.quit()
-            self.driver = None
+            try:
+                self.driver.quit()
+            except Exception as e:
+                print(f"Error while closing driver: {e}")
+            finally:
+                self.driver = None
 
     def send_prompt(self, prompt: str) -> bool:
         if self.driver is None:
