@@ -1,87 +1,78 @@
+import subprocess
+import psutil
 from pathlib import Path
-from chrome_tool.code_block_config import CodeBlockConfig
-from chrome_tool.prompt_config import PromptConfig
-from chrome_tool.agent_config import AgentConfig
-from pathlib import Path
+from typing import Optional
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
 import pyperclip
 import time
-from chrome_tool.code_block_config import CodeBlockConfig
 from chrome_tool.prompt_config import PromptConfig
-from chrome_tool.utils.json import (
-    append_json_strings_to_array,
-    convert_paths_to_json_safe,
-)
+from chrome_tool.code_block_config import CodeBlockConfig
 from chrome_tool.utils.string import clean_code
-from colorama import Fore, Style
-from chrome_tool.utils.colorama import color_print
-import os
-from typing import Any, Optional, cast
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from chrome_tool.utils.json import append_json_strings_to_array, convert_paths_to_json_safe
 from chrome_tool.utils.url import is_valid_url
-from chrome_tool.agent_config import AgentConfig
-from colorama import Fore, Style
-from chrome_tool.utils.colorama import color_print
 from chrome_tool.chrome_profile import ChromeProfile
+from chrome_tool.agent_config import AgentConfig
+from chrome_tool.utils.colorama import color_print
+from colorama import Fore, Style
 
 
 class Agent:
     def __init__(self):
         self.driver = None
 
+    def ensure_chrome_running(self, profile: ChromeProfile, port: int = 9222):
+        # ✅ Check if Chrome with --remote-debugging is already running
+        for proc in psutil.process_iter(['name', 'cmdline']): # type: ignore
+            if (
+                proc.info['name']
+                and 'chrome' in proc.info['name'].lower()
+                and '--remote-debugging-port={}'.format(port) in ' '.join(proc.info['cmdline'])
+            ):
+                return  # Already running
+
+        # ✅ Start Chrome with remote debugging
+        print(f"Starting Chrome with remote debugging on port {port}...")
+        chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        subprocess.Popen([
+            chrome_path,
+            f"--remote-debugging-port={port}",
+            f"--user-data-dir={profile.path}",
+            f"--profile-directory={profile.name}"
+        ])
+
+        # ✅ Give Chrome a moment to fully start
+        time.sleep(2)
+
     def open_chrome_with_profile(self, config: AgentConfig = AgentConfig(
-                page="https://chat.openai.com/",
-                detach=True)) -> None:
-        if self.driver is not None:
-            self.driver.quit()
-        color_print(f"Initializing Chrome with profile...\n", Fore.RED, style=Style.BRIGHT)
+        page="https://chat.openai.com/",
+        detach=True
+    )) -> None:
+        color_print("Connecting to existing Chrome...\n", Fore.RED, style=Style.BRIGHT)
 
         if not is_valid_url(config.page):
-            raise ValueError(f"Invalid URL: '{config.page}'. Must include scheme (e.g., https://) and domain.")
-        
-        if not (profile := self._get_first_chrome_profile()):
-            print("No active Chrome profile found")
-            return None
-        
-        print(f"Active Profile: {profile.path}, Profile Directory: {profile.name}")
+            raise ValueError(f"Invalid URL: '{config.page}'")
 
+        profile = self._get_first_chrome_profile()
+        if not profile:
+            raise RuntimeError("No valid Chrome profile found!")
+
+        self.ensure_chrome_running(profile)
+
+        # ✅ Attach to running Chrome
         options = Options()
-        
-        options.add_argument(f"user-data-dir={profile.path}")
-        options.add_argument(f"profile-directory={profile.name}")
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("--log-level=3")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--no-sandbox")
-        
-        experimental_options = cast(Any, options)
-        experimental_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
-        
-        if config.detach:
-            experimental_options.add_experimental_option("detach", True)
+        options.debugger_address = "127.0.0.1:9222"
 
         try:
-            service = cast(Any, Service())
-            service.creationflags = 0x08000000
-            service.quiet = True
-
-            os.environ['WDM_LOG_LEVEL'] = '0'
-            os.environ['WDM_PRINT_FIRST_LINE'] = 'False'
-
-            self.driver = webdriver.Chrome(service=service, options=options)
+            self.driver = webdriver.Chrome(options=options)
             self.driver.get(config.page)
-            print(f"Successfully opened: {config.page}")
+            print(f"Connected and opened: {config.page}")
         except Exception as e:
-            print(f"Failed to start Chrome: {str(e)}")
+            print(f"Could not attach to Chrome: {e}")
 
     def _get_first_chrome_profile(self) -> Optional[ChromeProfile]:
         profile_data = [
@@ -96,7 +87,7 @@ class Agent:
         return None
 
     def close(self):
-        if self.driver is not None:
+        if self.driver:
             try:
                 self.driver.quit()
             except Exception as e:
@@ -108,53 +99,45 @@ class Agent:
         if self.driver is None:
             raise Exception("ChatGPT session is not open.")
         config = PromptConfig(driver=self.driver, prompt=prompt)
-        color_print(f"Sending Prompt..\n", Fore.RED, style=Style.BRIGHT)
+        color_print("Press Enter to send prompt...\n", Fore.RED, style=Style.BRIGHT)
+        input()
         if config.printPrompt:
             print(config.prompt)
-        input("Enter to send prompt...") 
         try:
-            import pyperclip
             pyperclip.copy(config.prompt)
-            
-            driver = config.driver
-            input_area = driver.find_element(By.ID, config.input_area_id)
+            input_area = self.driver.find_element(By.ID, config.input_area_id)
             input_area.clear()
-
             input_area.click()
-            
-            if driver.name == 'chrome' or driver.name == 'edge':
+
+            if self.driver.name in ['chrome', 'edge']:
                 input_area.send_keys(Keys.CONTROL, 'v')
-            elif driver.name == 'firefox':
+            elif self.driver.name == 'firefox':
                 input_area.send_keys(Keys.COMMAND, 'v')
-            
+
             input_area.send_keys(Keys.RETURN)
-            print("Prompt sent successfully")
+            print("Prompt sent successfully.")
             return True
         except Exception as e:
-            print(f"Failed to send prompt: {str(e)}")
+            print(f"Failed to send prompt: {e}")
             return False
-            
-    def save_code(self, output_file_path: Path) -> str | None:
+
+    def save_code(self, output_file_path: Path) -> Optional[str]:
         if self.driver is None:
             raise Exception("ChatGPT session is not open.")
-        color_print(f"Saving Response..\n", Fore.RED, style=Style.BRIGHT)
+        color_print("Saving Response...\n", Fore.RED, style=Style.BRIGHT)
         config = CodeBlockConfig(driver=self.driver, output_file_path=output_file_path, overwrite=True)
-        input("Enter to save...") 
+        input("Press Enter to save...")
         try:
             copy_button_xpath = "(//button[contains(., 'Kopiuj')])[last()]"
-            copy_button = WebDriverWait(config.driver, config.delay_seconds).until(
+            copy_button = WebDriverWait(self.driver, config.delay_seconds).until(
                 EC.element_to_be_clickable((By.XPATH, copy_button_xpath))
             )
-
-            config.driver.execute_script("arguments[0].click();", copy_button) # type: ignore
+            self.driver.execute_script("arguments[0].click();", copy_button) # type: ignore
             time.sleep(1)
-
             response = clean_code(pyperclip.paste())
 
             if config.json:
-                append_json_strings_to_array(
-                    convert_paths_to_json_safe(response), config.output_file_path
-                )
+                append_json_strings_to_array(convert_paths_to_json_safe(response), config.output_file_path)
             else:
                 mode = "w" if config.overwrite else "a"
                 with open(config.output_file_path, mode, encoding="utf-8") as f:
@@ -163,22 +146,23 @@ class Agent:
             if config.printResponse:
                 print("Response:")
                 print(response)
-                
-            return response
 
+            return response
         except Exception as e:
-            print(f"Error saving last code block: {e}")
+            print(f"Error saving code: {e}")
             return None
-    
-    def save_response(self, output_file_path: Path=Path("response.md"), wait_time:int=60):
+
+    def save_response(self, output_file_path: Path = Path("response.md"), wait_time: int = 60) -> Optional[str]:
+        if self.driver is None:
+            raise Exception("ChatGPT session is not open.")
         try:
             last_copy_button_xpath = "(//button[contains(., 'Kopiuj') or @data-testid='copy-turn-action-button'])[last()]"
-            copy_button = WebDriverWait(self.driver, wait_time).until( # type: ignore
+            copy_button = WebDriverWait(self.driver, wait_time).until(
                 EC.element_to_be_clickable((By.XPATH, last_copy_button_xpath))
             )
             self.driver.execute_script("arguments[0].click();", copy_button) # type: ignore
             time.sleep(1)
-            response =  clean_code(pyperclip.paste())
+            response = clean_code(pyperclip.paste())
             with open(output_file_path, "a", encoding="utf-8") as f:
                 f.write(response + "\n\n")
             return response
