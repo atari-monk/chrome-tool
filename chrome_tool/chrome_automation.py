@@ -1,48 +1,55 @@
 import os
+from typing import Optional, Any, cast
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.webdriver import WebDriver as ChromeWebDriver
+from chrome_tool.chrome_profiles import get_first_chrome_profile
 from chrome_tool.utils.url import is_valid_url
-from chrome_tool.chatgpt.config.chatgpt_config import ChatGPTConfig
-from chrome_tool.chrome_profiles import get_chrome_profile
+from chrome_tool.chatgpt_config import ChatGPTConfig
+from colorama import Fore, Style
+from chrome_tool.utils.colorama import color_print
 
 
-def open_chrome_with_profile(config: ChatGPTConfig) -> webdriver.Chrome | None:
+def open_chrome_with_profile(config: ChatGPTConfig) -> Optional[ChromeWebDriver]:
+    color_print(f"Initializing Chrome with profile...\n", Fore.RED, style=Style.BRIGHT)
     if not is_valid_url(config.page):
         raise ValueError(f"Invalid URL: '{config.page}'. Must include scheme (e.g., https://) and domain.")
     
-    if not (profile := get_chrome_profile(config.config_path)):
+    if not (profile := get_first_chrome_profile()):
         print("No active Chrome profile found")
         return None
     
-    active_profile = profile["chromeProfilePath"]
-    profile_directory = profile["profileDirectory"]
-    custom_path = profile["customPath"]
-    if custom_path:
-        active_profile = custom_path
-    print(f"Active Profile: {active_profile}, Profile Directory: {profile_directory}")
+    print(f"Active Profile: {profile.path}, Profile Directory: {profile.name}")
 
     options = Options()
-    options.add_argument(rf"user-data-dir={active_profile}") # type: ignore
-    options.add_argument(f"profile-directory={profile_directory}") # type: ignore
-    options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"]) # type: ignore
-    options.add_argument("--disable-blink-features=AutomationControlled") # type: ignore
-    options.add_argument("--log-level=3") # type: ignore
-    options.add_argument("--disable-gpu") # type: ignore
-    options.add_argument("--disable-dev-shm-usage") # type: ignore
-    options.add_argument("--no-sandbox") # type: ignore
+    
+    options.add_argument(f"user-data-dir={profile.path}")
+    options.add_argument(f"profile-directory={profile.name}")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--log-level=3")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    
+    experimental_options = cast(Any, options)
+    experimental_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
     
     if config.detach:
-        options.add_experimental_option("detach", True) # type: ignore
+        experimental_options.add_experimental_option("detach", True)
 
-    service = Service()
-    service.creationflags = 0x08000000  # type: ignore
-    service.quiet = True # type: ignore
+    try:
+        service = cast(Any, Service())
+        service.creationflags = 0x08000000
+        service.quiet = True
 
-    os.environ['WDM_LOG_LEVEL'] = '0'
-    os.environ['WDM_PRINT_FIRST_LINE'] = 'False'
+        os.environ['WDM_LOG_LEVEL'] = '0'
+        os.environ['WDM_PRINT_FIRST_LINE'] = 'False'
 
-    driver = webdriver.Chrome(service=service, options=options)
-    driver.get(config.page)
-    print(f"Successfully opened: {config.page}")
-    return driver
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.get(config.page)
+        print(f"Successfully opened: {config.page}")
+        return driver
+    except Exception as e:
+        print(f"Failed to start Chrome: {str(e)}")
+        return None

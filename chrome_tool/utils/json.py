@@ -7,9 +7,7 @@ JSONPrimitive = Union[str, int, float, bool, None]
 JSONValue = Union[JSONPrimitive, Dict[str, Any], List[Any]]
 JSONType = Union[JSONPrimitive, Dict[str, JSONValue], List[JSONValue]]
 
-
 T = TypeVar('T', bound=JSONType)
-
 
 def convert_paths_to_json_safe(json_str: str) -> str:
     try:
@@ -21,7 +19,6 @@ def convert_paths_to_json_safe(json_str: str) -> str:
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON input: {e}") from e
 
-
 def process_item(item: T) -> T:
     if isinstance(item, str):
         return item.replace("\\", "/")  # type: ignore
@@ -30,7 +27,6 @@ def process_item(item: T) -> T:
     elif isinstance(item, list):
         return [process_item(i) for i in item]  # type: ignore
     return item
-
 
 def append_json_strings_to_array(
     json_strings: Union[str, List[str]], 

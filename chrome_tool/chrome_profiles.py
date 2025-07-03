@@ -1,44 +1,30 @@
-import json
-import os
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import Optional
 
 
-def get_chrome_profile(config_file_path: Union[Path, str]) -> dict[str, str] | None:
-    if config_file_path is str:
-        config_file_path = Path(config_file_path)
-    if config_file_path is Path and not config_file_path.exists():
-        print(f"Config file does not exist: {config_file_path}")
-        return None
-    try:
-        with open(config_file_path) as f:
-            config = json.load(f)
+@dataclass
+class ChromeProfile:
+    path: Path
+    name: str
 
-        for computer in config["computers"]:
-            profile_path = config["chromeProfilePath"].replace(
-                "{userName}", computer["userName"]
-            )
-            if os.path.exists(profile_path):
-                return {
-                    "computerName": computer["computerName"],
-                    "userName": computer["userName"],
-                    "chromeProfilePath": profile_path,
-                    "profileDirectory": computer["profileDirectory"],
-                    "customPath": computer["customPath"]
-                }
-        return None
-
-    except Exception as e:
-        print(f"Error loading active profile: {str(e)}")
-        return None
-
+def get_first_chrome_profile() -> Optional[ChromeProfile]:
+    profile_data = [
+        (Path("C:/atari-monk/my_chrome_profile"), "Default"),
+        (Path("C:/Users/ASUS/AppData/Local/Google/Chrome/User Data"), "Default"),
+        (Path("C:/Selenium"), "Profile 2"),
+        (Path("C:/Users/atari/AppData/Local/Google/Chrome/User Data"), "Profile 2"),
+    ]
+    for path, name in profile_data:
+        if path.exists():
+            return ChromeProfile(path, name)
+    return None
 
 def main():
-    if profile := get_chrome_profile(r"C:\atari-monk\code\docs\apps-data-store\chrome_profiles.json"):
-        print(f"Active Profile: {profile['chromeProfilePath']}")
+    if profile := get_first_chrome_profile():
+        print(f"Found Chrome profile: {profile.path} ({profile.name})")
     else:
-        print("No active Chrome profile found")
-
+        print("No Chrome profiles found")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 from pathlib import Path
-from chrome_tool.agents.chatgpt_agent import ChatGPTAgent
+from chrome_tool.chatgpt_agent import ChatGPTAgent
 
 
 def main():

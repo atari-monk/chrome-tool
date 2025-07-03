@@ -8,16 +8,22 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import pyperclip
 import time
-from chrome_tool.chatgpt.config.code_block_config import CodeBlockConfig
-from chrome_tool.chatgpt.config.prompt_config import PromptConfig
+from chrome_tool.code_block_config import CodeBlockConfig
+from chrome_tool.prompt_config import PromptConfig
 from chrome_tool.utils.json import (
     append_json_strings_to_array,
     convert_paths_to_json_safe,
 )
 from chrome_tool.utils.string import clean_code
+from colorama import Fore, Style
+from chrome_tool.utils.colorama import color_print
 
 
 def send_prompt(config: PromptConfig) -> bool:
+    color_print(f"Sending Prompt..\n", Fore.RED, style=Style.BRIGHT)
+    if config.printPrompt:
+        print(config.prompt)
+    input("Enter to send prompt...") 
     try:
         import pyperclip
         pyperclip.copy(config.prompt)
@@ -40,7 +46,6 @@ def send_prompt(config: PromptConfig) -> bool:
         print(f"Failed to send prompt: {str(e)}")
         return False
 
-
 def save_response(driver: webdriver.Chrome, output_file_path: Path=Path("response.md"), wait_time:int=60):
     try:
         last_copy_button_xpath = "(//button[contains(., 'Kopiuj') or @data-testid='copy-turn-action-button'])[last()]"
@@ -57,8 +62,9 @@ def save_response(driver: webdriver.Chrome, output_file_path: Path=Path("respons
         print(f"Error saving response: {e}")
         return None
 
-
 def save_code_block(config: CodeBlockConfig):
+    color_print(f"Saving Response..\n", Fore.RED, style=Style.BRIGHT)
+    input("Enter to save...") 
     try:
         copy_button_xpath = "(//button[contains(., 'Kopiuj')])[last()]"
         copy_button = WebDriverWait(config.driver, config.delay_seconds).until(
@@ -79,6 +85,10 @@ def save_code_block(config: CodeBlockConfig):
             with open(config.output_file_path, mode, encoding="utf-8") as f:
                 f.write(response + "\n\n")
 
+        if config.printResponse:
+            print("Response:")
+            print(response)
+            
         return response
 
     except Exception as e:

@@ -1,12 +1,12 @@
 from pathlib import Path
-from chrome_tool.chatgpt.config.code_block_config import CodeBlockConfig
-from chrome_tool.chatgpt.config.prompt_config import PromptConfig
-from chrome_tool.chatgpt.chatgpt_cli import (
+from chrome_tool.code_block_config import CodeBlockConfig
+from chrome_tool.prompt_config import PromptConfig
+from chrome_tool.chatgpt_cli import (
     open_chatgpt_session,
     save_chatgpt_code_block,
     send_chatgpt_prompt,
 )
-from chrome_tool.chatgpt.config.chatgpt_config import ChatGPTConfig
+from chrome_tool.chatgpt_config import ChatGPTConfig
 
 
 class ChatGPTAgent:
@@ -19,7 +19,6 @@ class ChatGPTAgent:
         self.driver = open_chatgpt_session(
             ChatGPTConfig(
                 page="https://chat.openai.com/",
-                config_path=r"C:\atari-monk\code\docs\apps-data-store\chrome_profiles.json",
                 detach=True))
 
     def close(self):

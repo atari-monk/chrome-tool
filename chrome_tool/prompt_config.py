@@ -8,5 +8,3 @@ class PromptConfig:
     prompt: str
     printPrompt:bool=False
     input_area_id: str = "prompt-textarea"
-    use_delay: bool=False
-    delay_seconds: int = 0
