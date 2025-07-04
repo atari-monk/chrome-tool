@@ -1,5 +1,7 @@
 from pathlib import Path
 from chrome_tool.agent import Agent
+from chrome_tool.agent_config import AgentConfig
+from enum import Enum
 
 
 def main():
@@ -29,14 +31,27 @@ Implement a Fibonacci sequence function that passes all tests with these require
 5. Implementation must be iterative (not recursive)
     """
 
-    c = Agent()
-    c.open_chrome_with_profile()
-    c.send_prompt(prompt_1)
-    c.save_code(Path("generated/test_fibonacci.py"))
+    class AI(Enum):
+        CHATGPT = "chatgpt"
+        DEEPSEEK = "deepseek"
 
-    c.send_prompt(prompt_2)
-    c.save_code(Path("generated/fibonacci.py"))
-    c.close()
+    ai_chat = {
+        AI.CHATGPT: {"page": "https://chat.openai.com/"},
+        AI.DEEPSEEK: {"page": "https://chat.deepseek.com/"}
+    }
+
+    ai = AI.DEEPSEEK
+
+    agent = Agent()
+    agent.open_chrome_with_profile(AgentConfig(page=ai_chat[ai]["page"]))
+
+    agent.send_prompt(prompt_1)
+    agent.save_code(Path("generated/test_fibonacci.py"))
+
+    agent.send_prompt(prompt_2)
+    agent.save_code(Path("generated/fibonacci.py"))
+    
+    agent.close()
 
 if __name__ == "__main__":
     main()

@@ -49,8 +49,7 @@ class Agent:
         time.sleep(2)
 
     def open_chrome_with_profile(self, config: AgentConfig = AgentConfig(
-        page="https://chat.openai.com/",
-        detach=True
+        page="https://chat.openai.com/"
     )) -> None:
         color_print("Connecting to existing Chrome...\n", Fore.RED, style=Style.BRIGHT)
 
@@ -95,16 +94,15 @@ class Agent:
             finally:
                 self.driver = None
 
-    def send_prompt(self, prompt: str) -> bool:
+    def send_prompt(self, prompt: str, config: PromptConfig = PromptConfig()) -> bool:
         if self.driver is None:
             raise Exception("ChatGPT session is not open.")
-        config = PromptConfig(driver=self.driver, prompt=prompt)
         color_print("Press Enter to send prompt...\n", Fore.RED, style=Style.BRIGHT)
         input()
         if config.printPrompt:
-            print(config.prompt)
+            print(prompt)
         try:
-            pyperclip.copy(config.prompt)
+            pyperclip.copy(prompt)
             input_area = self.driver.find_element(By.ID, config.input_area_id)
             input_area.clear()
             input_area.click()
